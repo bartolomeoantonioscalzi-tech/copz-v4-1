@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0ea5e9">
+  <title>C&OPZ — Compleanni & Onomastici</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230ea5e9'/%3E%3Ctext x='50' y='65' font-size='50' text-anchor='middle' fill='white'%3E🎂%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="app">
+    <header>
+      <h1>🎂 C&OPZ</h1>
+      <p class="subtitle">Compleanni & Onomastici</p>
+    </header>
+
+    <!-- UPLOAD SECTION -->
+    <section id="upload-section" class="card">
+      <h2>📁 Carica i tuoi dati</h2>
+
+      <div class="upload-row">
+        <div class="upload-block">
+          <label for="vcf-file">📇 Rubrica (VCF)</label>
+          <input type="file" id="vcf-file" accept=".vcf,.vcard" />
+          <span id="vcf-status" class="status">Nessun file</span>
+        </div>
+        <div class="upload-block">
+          <label for="csv-file">📅 Onomastici (CSV)</label>
+          <input type="file" id="csv-file" accept=".csv,.txt" />
+          <span id="csv-status" class="status">Nessun file</span>
+        </div>
+      </div>
+
+      <div class="csv-opts">
+        <label>Codifica CSV:</label>
+        <select id="csv-encoding">
+          <option value="utf-8">UTF-8</option>
+          <option value="iso-8859-1" selected>ISO-8859-1 (Windows)</option>
+          <option value="windows-1252">Windows-1252</option>
+        </select>
+        <small>Formato atteso: <code>NOME,GG,MM</code> (es: <code>Marco,25,04</code>)</small>
+      </div>
+
+      <button id="btn-process" class="btn-primary">🔄 Elabora</button>
+      <button id="btn-clear" class="btn-secondary">🗑️ Svuota dati</button>
+    </section>
+
+    <!-- TABS -->
+    <nav class="tabs" id="tabs">
+      <button class="tab-btn active" data-tab="oggi">📅 Oggi</button>
+      <button class="tab-btn" data-tab="anticipati">⏪ Anticipati</button>
+      <button class="tab-btn" data-tab="domani">⏩ Domani</button>
+      <button class="tab-btn" data-tab="impostazioni">⚙️ Messaggi</button>
+    </nav>
+
+    <!-- TAB OGGI -->
+    <section id="tab-oggi" class="tab-content active">
+      <div class="day-header">
+        <h2>📅 Oggi — <span id="date-oggi"></span></h2>
+        <div class="stats">
+          <span id="count-oggi">0</span> contatti
+          <span id="sent-oggi" class="sent-badge">0 inviati</span>
+        </div>
+      </div>
+      <div id="list-oggi" class="contact-list"></div>
+    </section>
+
+    <!-- TAB ANTICIPATI -->
+    <section id="tab-anticipati" class="tab-content">
+      <div class="day-header">
+        <h2>⏪ Anticipati — <span id="date-anticipati"></span></h2>
+        <div class="stats"><span id="count-anticipati">0</span> contatti</div>
+      </div>
+      <div id="list-anticipati" class="contact-list"></div>
+    </section>
+
+    <!-- TAB DOMANI -->
+    <section id="tab-domani" class="tab-content">
+      <div class="day-header">
+        <h2>⏩ Domani — <span id="date-domani"></span></h2>
+        <div class="stats"><span id="count-domani">0</span> contatti</div>
+      </div>
+      <div id="list-domani" class="contact-list"></div>
+    </section>
+
+    <!-- TAB IMPOSTAZIONI / EDITOR MESSAGGI -->
+    <section id="tab-impostazioni" class="tab-content">
+      <div class="settings-card">
+        <h2>✏️ Editor messaggi</h2>
+
+        <div class="msg-section">
+          <h3>🎂 Compleanno — Variante 1</h3>
+          <input type="text" id="msg-c1-p1" class="msg-part" placeholder="Parte 1 (es: Tanti auguri)">
+          <input type="text" id="msg-c1-p2" class="msg-part" placeholder="Parte 2 (es: per il tuo compleanno!)">
+        </div>
+        <div class="msg-section">
+          <h3>🎂 Compleanno — Variante 2</h3>
+          <input type="text" id="msg-c2-p1" class="msg-part" placeholder="Parte 1">
+          <input type="text" id="msg-c2-p2" class="msg-part" placeholder="Parte 2">
+        </div>
+        <div class="msg-section">
+          <h3>🎂 Compleanno — Variante 3</h3>
+          <input type="text" id="msg-c3-p1" class="msg-part" placeholder="Parte 1">
+          <input type="text" id="msg-c3-p2" class="msg-part" placeholder="Parte 2">
+        </div>
+
+        <div class="msg-section">
+          <h3>🕯️ Commemorativo (MORTO/MORTA — solo OGGI)</h3>
+          <input type="text" id="msg-dead-p1" class="msg-part" placeholder="Parte 1 (es: In ricordo di)">
+          <input type="text" id="msg-dead-p2" class="msg-part" placeholder="Parte 2 (es: che oggi ci manca.)">
+        </div>
+
+        <div class="msg-section">
+          <h3>📛 Onomastico — Variante 1</h3>
+          <input type="text" id="msg-o1-p1" class="msg-part" placeholder="Parte 1 (es: Buon onomastico)">
+          <input type="text" id="msg-o1-p2" class="msg-part" placeholder="Parte 2 (es: !)">
+        </div>
+        <div class="msg-section">
+          <h3>📛 Onomastico — Variante 2</h3>
+          <input type="text" id="msg-o2-p1" class="msg-part" placeholder="Parte 1">
+          <input type="text" id="msg-o2-p2" class="msg-part" placeholder="Parte 2">
+        </div>
+        <div class="msg-section">
+          <h3>📛 Onomastico — Variante 3</h3>
+          <input type="text" id="msg-o3-p1" class="msg-part" placeholder="Parte 1">
+          <input type="text" id="msg-o3-p2" class="msg-part" placeholder="Parte 2">
+        </div>
+        <div class="msg-section">
+          <h3>📛 Onomastico — Variante 4</h3>
+          <input type="text" id="msg-o4-p1" class="msg-part" placeholder="Parte 1">
+          <input type="text" id="msg-o4-p2" class="msg-part" placeholder="Parte 2">
+        </div>
+        <div class="msg-section">
+          <h3>📛 Onomastico — Variante 5</h3>
+          <input type="text" id="msg-o5-p1" class="msg-part" placeholder="Parte 1">
+          <input type="text" id="msg-o5-p2" class="msg-part" placeholder="Parte 2">
+        </div>
+
+        <div class="msg-section">
+          <h3>🖊️ Firma (opzionale)</h3>
+          <input type="text" id="msg-signature" class="msg-part" placeholder="es: — Mario Rossi, Commercialista">
+        </div>
+
+        <button id="btn-save-msg" class="btn-primary">💾 Salva messaggi</button>
+        <button id="btn-reset-msg" class="btn-secondary">🔄 Ripristina default</button>
+      </div>
+
+      <div class="settings-card">
+        <h2>⚡ Anti-Ban</h2>
+        <label>
+          <input type="checkbox" id="anti-ban-toggle" checked>
+          Attiva ritardo tra invii (sequenza manuale)
+        </label>
+        <p class="hint">Se attivo, dopo ogni invio attendi 2 secondi prima del prossimo per evitare blocchi.</p>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+      <p>C&OPZ v4.1 — PWA offline-ready</p>
+    </footer>
+  </div>
+
+  <!-- TEMPLATE CONTATTO -->
+  <template id="tmpl-contact">
+    <div class="contact-card" data-id="">
+      <div class="contact-main">
+        <div class="contact-avatar"></div>
+        <div class="contact-info">
+          <div class="contact-name"></div>
+          <div class="contact-detail"></div>
+          <div class="contact-phone"></div>
+        </div>
+        <div class="contact-actions">
+          <button class="btn-tg" title="Telegram">✈️</button>
+          <button class="btn-wa" title="WhatsApp">💬</button>
+          <button class="btn-sms" title="SMS">📩</button>
+        </div>
+      </div>
+      <div class="contact-preview">
+        <span class="preview-text"></span>
+        <span class="preview-variant"></span>
+      </div>
+      <div class="contact-status">
+        <span class="status-badge"></span>
+      </div>
+    </div>
+  </template>
+
+  <script src="js/parser.js"></script>
+  <script src="js/matcher.js"></script>
+  <script src="js/messages.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    }
+  </script>
+</body>
+</html>
